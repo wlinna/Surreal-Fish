@@ -1,15 +1,26 @@
 package surrealfish;
 
+import arkhados.net.DefaultReceiver;
+import arkhados.net.OneTrueMessage;
+import arkhados.net.Receiver;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.network.Client;
+import com.jme3.network.Network;
+import com.jme3.network.NetworkClient;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import surrealfish.net.DataRegistration;
 
 /**
  * test
+ *
  * @author normenhansen
  */
 public class ClientMain extends SimpleApplication {
@@ -23,9 +34,24 @@ public class ClientMain extends SimpleApplication {
     public void simpleInitApp() {
         BulletAppState physics = new BulletAppState();
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
-        physics.getPhysicsSpace().setAccuracy(1 / 30f);
         stateManager.attach(physics);
+        physics.getPhysicsSpace().setAccuracy(1 / 30f);
+
+        DataRegistration.register();
+
+        NetworkClient client = Network.createClient();
+        Receiver receiver = new DefaultReceiver();
+        client.addMessageListener(receiver, OneTrueMessage.class);
         
+        try {
+            client.connectToServer("127.0.0.1", 12345, 12345);
+            client.start();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientMain.class.getName())
+                    .log(Level.SEVERE, null, ex);
+            System.exit(1);
+        }
+
         Box b = new Box(1, 1, 1);
         Geometry geom = new Geometry("Box", b);
 
