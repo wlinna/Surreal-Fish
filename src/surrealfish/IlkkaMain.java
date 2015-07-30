@@ -32,23 +32,30 @@ public class IlkkaMain extends SimpleApplication
 
     @Override
     public void simpleInitApp() {
-        
-        
+
+
         DirectionalLight dl = new DirectionalLight();
         dl.setDirection(new Vector3f(-0.1f, -1f, -1).normalizeLocal());
         rootNode.addLight(dl);
-        
+
         rootNode.attachChild(assetManager.loadModel("Scenes/newScene.j3o"));
-        
+
         player = (Node) assetManager.loadModel("Models/testiUkko.j3o");
         // Use BetterCharacterControl instead of using move-method of player
 //        player.addControl(new BetterCharacterControl(5f, 5f, 1f));
 //        player.getControl(BetterCharacterControl.class).setWalkDirection(new Vector3f(Vector3f.UNIT_Z));
 
 
-        
+
         rootNode.attachChild(player);
-        for (Spatial object : ((Node) player.getChild(0)).getChildren()) {
+        Node child = (Node) player.getChild(0);
+        AnimControl control1 = child.getControl(AnimControl.class);
+        control1.addListener(this);
+
+//        AnimChannel channel1 = control1.createChannel();
+//        channel1.setAnim("Walk");
+        
+        for (Spatial object : child.getChildren()) {
             AnimControl control = object.getControl(AnimControl.class);
             if (control == null) {
                 continue;
@@ -76,7 +83,6 @@ public class IlkkaMain extends SimpleApplication
     public void simpleRender(RenderManager rm) {
     }
 
-
     @Override
     public void onAnimCycleDone(AnimControl control, AnimChannel channel, String animName) {
         if (animName.equals("Walk")) {
@@ -86,7 +92,6 @@ public class IlkkaMain extends SimpleApplication
         }
     }
 
- 
     @Override
     public void onAnimChange(AnimControl control, AnimChannel channel, String animName) {
     }
