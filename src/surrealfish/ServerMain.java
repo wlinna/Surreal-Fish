@@ -11,6 +11,7 @@ import com.jme3.network.Server;
 import com.jme3.renderer.RenderManager;
 import java.io.IOException;
 import surrealfish.net.DataRegistration;
+import surrealfish.net.ServerNetListener;
 
 public class ServerMain extends SimpleApplication {
 
@@ -40,10 +41,14 @@ public class ServerMain extends SimpleApplication {
         DataRegistration.register();
 
         receiver = new DefaultReceiver();
-        server.addMessageListener(receiver, OneTrueMessage.class);
+        stateManager.attach(receiver);        
+        server.addMessageListener(receiver, OneTrueMessage.class);        
 
         sender = new ServerSender(server);
+        stateManager.attach(sender);
         receiver.registerCommandHandler(sender);
+        
+        server.addConnectionListener(new ServerNetListener(this, server));
     }
 
     @Override

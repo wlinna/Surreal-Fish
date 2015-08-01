@@ -1,5 +1,6 @@
 package surrealfish;
 
+import arkhados.net.ClientSender;
 import arkhados.net.DefaultReceiver;
 import arkhados.net.OneTrueMessage;
 import arkhados.net.Receiver;
@@ -16,6 +17,7 @@ import com.jme3.scene.shape.Box;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import surrealfish.net.ClientNetListener;
 import surrealfish.net.DataRegistration;
 
 /**
@@ -29,6 +31,8 @@ public class ClientMain extends SimpleApplication {
         ClientMain app = new ClientMain();
         app.start();
     }
+    // TODO: Remove this. It's temporarily here
+    public static int playerId = -1;
 
     @Override
     public void simpleInitApp() {
@@ -41,8 +45,14 @@ public class ClientMain extends SimpleApplication {
 
         NetworkClient client = Network.createClient();
         Receiver receiver = new DefaultReceiver();
+        stateManager.attach(receiver);
         client.addMessageListener(receiver, OneTrueMessage.class);
-        
+        client.addClientStateListener(new ClientNetListener());
+
+        ClientSender sender = new ClientSender();
+        stateManager.attach(sender);
+        receiver.registerCommandHandler(sender);
+
         try {
             client.connectToServer("127.0.0.1", 12345, 12345);
             client.start();
