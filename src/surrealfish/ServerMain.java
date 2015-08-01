@@ -9,15 +9,17 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import com.jme3.renderer.RenderManager;
+import com.jme3.system.JmeContext;
 import java.io.IOException;
 import surrealfish.net.DataRegistration;
 import surrealfish.net.ServerNetListener;
 
 public class ServerMain extends SimpleApplication {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) {   
         ServerMain app = new ServerMain();
-        app.start();
+        app.pauseOnFocus = false;
+        app.start(JmeContext.Type.Headless);
     }
     private Server server;
     private Receiver receiver;
@@ -29,8 +31,6 @@ public class ServerMain extends SimpleApplication {
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         stateManager.attach(physics);
         physics.getPhysicsSpace().setAccuracy(1 / 60f);
-
-
         try {
             server = Network.createServer(12345, 12345);
             server.start();
@@ -38,17 +38,25 @@ public class ServerMain extends SimpleApplication {
             System.exit(1);
         }
 
-        DataRegistration.register();
-
         receiver = new DefaultReceiver();
-        stateManager.attach(receiver);        
-        server.addMessageListener(receiver, OneTrueMessage.class);        
+        server.addMessageListener(receiver, OneTrueMessage.class);
 
         sender = new ServerSender(server);
-        stateManager.attach(sender);
         receiver.registerCommandHandler(sender);
-        
-        server.addConnectionListener(new ServerNetListener(this, server));
+
+        DataRegistration.register();
+
+        ServerNetListener netListener = new ServerNetListener(this, server);
+        receiver.registerCommandHandler(netListener);
+        server.addConnectionListener(netListener);
+        Area world = new Area();
+
+        inputManager.setCursorVisible(true);
+        flyCam.setEnabled(false);
+
+        stateManager.attach(receiver);
+        stateManager.attach(sender);
+        stateManager.attach(world);
     }
 
     @Override

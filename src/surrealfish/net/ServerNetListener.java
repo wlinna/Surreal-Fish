@@ -8,6 +8,8 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Server;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +30,7 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
     private ServerMain app;
     private AppStateManager stateManager;
     private boolean someoneJoined = false;
-
+    
     public ServerNetListener(ServerMain app, Server server) {
         this.app = app;
         stateManager = app.getStateManager();
@@ -41,7 +43,7 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
             ServerClientData.add(clientId);
             ServerSender sender = stateManager.getState(ServerSender.class);
             sender.addConnection(conn);
-            stateManager.getState(Receiver.class).addConnection(conn);
+            stateManager.getState(Receiver.class).addConnection(conn);           
 
             CmdTopicOnly connectionEstablishendCommand =
                     new CmdTopicOnly(Topic.CONNECTION_ESTABLISHED);
@@ -80,7 +82,6 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
                 return null;
             }
         });
-
     }
 
     @Override

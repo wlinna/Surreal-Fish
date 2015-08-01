@@ -10,6 +10,7 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import surrealfish.ClientMain;
+import surrealfish.Area;
 import surrealfish.net.commands.CmdClientLogin;
 import surrealfish.net.commands.CmdServerLogin;
 import surrealfish.net.commands.CmdSetPlayersCharacter;
@@ -21,7 +22,7 @@ public class ClientNetListener extends AbstractAppState
         implements ClientStateListener, CommandHandler {
 
     private ClientMain app;
-    private String name = "";
+    private String name = "123";
     private Timer udpHandshakeAckTimer = new Timer(1f);
     private boolean handshakeComplete = false;
 
@@ -100,9 +101,12 @@ public class ClientNetListener extends AbstractAppState
     }
 
     private void handleLoginCommand(CmdServerLogin loginCommand) {
-        if (loginCommand.isAccepted()) {
-            ClientMain.playerId = loginCommand.getPlayerId();
+        if (!loginCommand.isAccepted()) {
+            return;
         }
+
+        ClientMain.playerId = loginCommand.getPlayerId();
+        app.getStateManager().attach(new Area());
     }
 
     private void handleSetPlayersCharacter(CmdSetPlayersCharacter message) {
