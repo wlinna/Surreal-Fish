@@ -13,6 +13,7 @@ import com.jme3.system.JmeContext;
 import java.io.IOException;
 import surrealfish.net.DataRegistration;
 import surrealfish.net.ServerNetListener;
+import surrealfish.net.Syncer;
 
 public class ServerMain extends SimpleApplication {
 
@@ -27,6 +28,7 @@ public class ServerMain extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        Globals.assetManager = assetManager;
         BulletAppState physics = new BulletAppState();
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         stateManager.attach(physics);
@@ -50,6 +52,9 @@ public class ServerMain extends SimpleApplication {
         receiver.registerCommandHandler(netListener);
         server.addConnectionListener(netListener);
         Area world = new Area();
+        
+        Syncer syncer = new Syncer();
+        receiver.registerCommandHandler(syncer);
 
         inputManager.setCursorVisible(true);
         flyCam.setEnabled(false);
@@ -57,6 +62,7 @@ public class ServerMain extends SimpleApplication {
         stateManager.attach(receiver);
         stateManager.attach(sender);
         stateManager.attach(world);
+        stateManager.attach(syncer);
     }
 
     @Override
