@@ -88,11 +88,6 @@ public class IlkkaMain extends SimpleApplication
         camNode.lookAt(player.getLocalTranslation(), Vector3f.UNIT_Y);
 
         ChaseCamera chaseCam = new ChaseCamera(cam, player, inputManager);
-        chaseCam.setSmoothMotion(true);
-        //control = player.getChild("TestiUkko:Body").getControl(AnimControl.class);
-        //control.addListener(this);
-        //channel = control.createChannel();
-        //channel.setAnim("Walk");
 
         // Test multiple inputs per mapping
         inputManager.addMapping("Forward", new KeyTrigger(KeyInput.KEY_W));
