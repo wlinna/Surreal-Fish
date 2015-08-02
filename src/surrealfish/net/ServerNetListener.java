@@ -25,7 +25,6 @@ import surrealfish.net.commands.CmdServerLogin;
 import surrealfish.net.commands.CmdSetPlayersCharacter;
 import surrealfish.net.commands.CmdTopicOnly;
 import surrealfish.net.commands.Topic;
-import surrealfish.net.commands.sync.CmdAddEntity;
 
 /**
  *
@@ -148,19 +147,21 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
                 delayed(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
-                        Spatial entity = app.getStateManager()
-                                .getState(Area.class).newEntity(0,
-                                Vector3f.ZERO, Quaternion.ZERO, playerId);
+                        Area area = app.getStateManager().getState(Area.class);
+
+                        area.informAboutEntities(source);
                         
+                        Spatial entity = area.newEntity(0, Vector3f.ZERO,
+                                Quaternion.ZERO, playerId);
+
                         int entityId = entity.getUserData(UserData.ENTITY_ID);
-                        
+
                         PlayerData.setData(playerId, PlayerData.ENTITY_ID,
                                 entityId);
-                        
-                        sender.addCommandForSingle(
-                                new CmdSetPlayersCharacter(entityId, playerId),
-                                source);
-                        
+
+                        sender.addCommand(
+                                new CmdSetPlayersCharacter(entityId, playerId));
+
                         return null;
                     }
                 }, 200);

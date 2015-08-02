@@ -1,6 +1,7 @@
 package surrealfish;
 
 import arkhados.net.Sender;
+import arkhados.net.ServerSender;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
@@ -8,6 +9,7 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.network.HostedConnection;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import java.util.HashMap;
@@ -48,7 +50,7 @@ public class Area extends AbstractAppState {
 
         app.getCamera().setLocation(new Vector3f(0, 5, 10));
         app.getCamera().lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
-        
+
         entityCreatorRepo.addCreator(new TestCharacterCreator());
     }
 
@@ -67,17 +69,34 @@ public class Area extends AbstractAppState {
         entity.setUserData(UserData.PLAYER_ID, playerId);
 
         worldRoot.attachChild(entity);
-        
+
         entities.put(entityId, entity);
-        syncer.addObject(entityId, entity);        
+        syncer.addObject(entityId, entity);
 
         Sender sender = app.getStateManager().getState(Sender.class);
         if (!sender.isClient()) {
-            sender.addCommand(new CmdAddEntity(creatorId, entityId,  loc, rot,
+            sender.addCommand(new CmdAddEntity(creatorId, entityId, loc, rot,
                     playerId));
         }
 
         return entity;
+    }
+
+    public void informAboutEntities(HostedConnection conn) {
+        ServerSender sender = (ServerSender) app
+                .getStateManager().getState(Sender.class);
+        for (Map.Entry<Integer, Spatial> entry : entities.entrySet()) {
+            Spatial spatial = entry.getValue();
+
+            int creatorId = spatial.getUserData(UserData.CREATOR_ID);
+            int entityId = entry.getKey();
+            int playerId = spatial.getUserData(UserData.PLAYER_ID);
+            // TODO: This won't work with physics-enabled entities in general
+            Vector3f loc = spatial.getLocalTranslation();
+            Quaternion rot = spatial.getWorldRotation();
+            sender.addCommandForSingle(new CmdAddEntity(creatorId, entityId,
+                    loc, rot, playerId), conn);
+        }
     }
 
     @Override
