@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import surrealfish.net.ClientNetListener;
 import surrealfish.net.DataRegistration;
+import surrealfish.net.Syncer;
 
 public class ClientMain extends SimpleApplication {
 
@@ -28,6 +29,8 @@ public class ClientMain extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        Globals.assetManager = assetManager;
+
         BulletAppState physics = new BulletAppState();
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         stateManager.attach(physics);
@@ -52,6 +55,10 @@ public class ClientMain extends SimpleApplication {
         sender.setClient(client);
         stateManager.attach(sender);
         receiver.registerCommandHandler(sender);
+
+        Syncer syncer = new Syncer();
+        receiver.registerCommandHandler(syncer);
+        stateManager.attach(syncer);
 
         // FIXME: We use delay because otherwise getLastReceivedOrderNum
         // would fail
