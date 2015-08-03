@@ -62,7 +62,7 @@ public class Area extends AbstractAppState {
     public Spatial addEntity(int creatorId, int entityId, Vector3f loc,
             Quaternion rot, int playerId) {
         EntityCreator creator = entityCreatorRepo.creator(creatorId);
-        Spatial entity = creator.create(new CreationParams(creatorId, loc));
+        Spatial entity = creator.create(new CreationParams(loc));
 
         entity.setUserData(UserData.CREATOR_ID, creatorId);
         entity.setUserData(UserData.ENTITY_ID, entityId);
