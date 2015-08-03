@@ -25,14 +25,14 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.control.CameraControl.ControlDirection;
 import java.util.ArrayList;
 import java.util.List;
-
+import surrealfish.entity.controls.CCharaterAnim;
 /**
  * test
  *
  * @author normenhansen
  */
 public class IlkkaMain extends SimpleApplication
-        implements AnimEventListener {
+         {
 
     private ArrayList<AnimChannel> channelList = new ArrayList<AnimChannel>();
     //private AnimControl control;
@@ -58,11 +58,13 @@ public class IlkkaMain extends SimpleApplication
         rootNode.attachChild(assetManager.loadModel("Scenes/newScene.j3o"));
 
         player = (Node) assetManager.loadModel("Models/testiUkko.j3o");
-        
-        
+
+
         rootNode.attachChild(player);
-        Node child = (Node) player.getChild(0);
-        AnimControl control1 = child.getControl(AnimControl.class);
+        CCharaterAnim c = new CCharaterAnim();
+        player.addControl(c);
+        /*Node child = (Node) player.getChild(0);
+         AnimControl control1 = child.getControl(AnimControl.class);
         control1.addListener(this);
 
         for (Spatial object : child.getChildren()) {
@@ -78,6 +80,7 @@ public class IlkkaMain extends SimpleApplication
             channelList.add(channel);
         }
 
+         */
         flyCam.setEnabled(false);
 
         camNode = new CameraNode("Camera Node", cam);
@@ -128,18 +131,6 @@ public class IlkkaMain extends SimpleApplication
 
     @Override
     public void simpleRender(RenderManager rm) {
-    }
-
-    @Override
-    public void onAnimCycleDone(AnimControl control, AnimChannel channel, String animName) {
-        //if (animName.equals("Walk")) {
-        //channel.setAnim("Walk");
-        //}
-    }
-
-    @Override
-    public void onAnimChange(AnimControl control, AnimChannel channel, String animName) {
-        
     }
 
     private void updateWalkTime() {
