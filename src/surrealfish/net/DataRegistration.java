@@ -8,6 +8,7 @@ import arkhados.net.Ack;
 import arkhados.net.OneTrueMessage;
 import arkhados.net.OtmIdCommandListPair;
 import com.jme3.network.serializing.Serializer;
+import surrealfish.entity.ProjectileCreator;
 import surrealfish.entity.TestCharacterCreator;
 import surrealfish.net.commands.CmdClientLogin;
 import surrealfish.net.commands.CmdServerLogin;
@@ -33,5 +34,6 @@ public class DataRegistration {
 
         Serializer.registerClass(
                 TestCharacterCreator.TestCharacterStateData.class);
+        Serializer.registerClass(ProjectileCreator.ProjectileStateData.class);
     }
 }

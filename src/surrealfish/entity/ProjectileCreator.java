@@ -34,7 +34,7 @@ public class ProjectileCreator implements EntityCreator {
             private Vector3f loc;
             private Quaternion rot;
             
-            ProjectileStateData() {
+            public ProjectileStateData() {
             }
 
             public ProjectileStateData(int syncId, Spatial spatial) {
