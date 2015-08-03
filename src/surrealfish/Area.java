@@ -99,6 +99,10 @@ public class Area extends AbstractAppState {
         }
     }
 
+    public Spatial getEntity(int id) {
+        return entities.get(id);
+    }
+    
     @Override
     public void update(float tpf) {
     }

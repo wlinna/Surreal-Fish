@@ -150,21 +150,29 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
                         Area area = app.getStateManager().getState(Area.class);
 
                         area.informAboutEntities(source);
-                        
+
                         Spatial entity = area.newEntity(0, Vector3f.ZERO,
                                 Quaternion.ZERO, playerId);
 
-                        int entityId = entity.getUserData(UserData.ENTITY_ID);
+                        final int entityId = entity
+                                .getUserData(UserData.ENTITY_ID);
 
                         PlayerData.setData(playerId, PlayerData.ENTITY_ID,
                                 entityId);
 
-                        sender.addCommand(
-                                new CmdSetPlayersCharacter(entityId, playerId));
+                        delayed(new Callable<Void>() {
+                            @Override
+                            public Void call() throws Exception {
+
+                                sender.addCommand(new CmdSetPlayersCharacter(
+                                        entityId, playerId));
+                                return null;
+                            }
+                        }, 300);
 
                         return null;
                     }
-                }, 200);
+                }, 100);
 
                 return null;
             }
