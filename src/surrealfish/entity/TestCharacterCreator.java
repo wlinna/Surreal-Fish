@@ -23,15 +23,15 @@ public class TestCharacterCreator implements EntityCreator {
     }
 
     @Serializable
-    public static class CTestCharacterStateData extends StateData {
+    public static class TestCharacterStateData extends StateData {
 
         private Vector3f loc = new Vector3f();
         private Quaternion rot = new Quaternion();
 
-        public CTestCharacterStateData() {
+        public TestCharacterStateData() {
         }
 
-        public CTestCharacterStateData(int syncId, Spatial spatial) {
+        public TestCharacterStateData(int syncId, Spatial spatial) {
             super(syncId);
             loc.set(spatial.getLocalTranslation());
             rot.set(spatial.getLocalRotation());
@@ -69,6 +69,6 @@ class CTestCharacter extends AbstractControl implements CSync {
     @Override
     public StateData getSyncableData(StateData stateData) {
         int id = spatial.getUserData(UserData.ENTITY_ID);
-        return new TestCharacterCreator.CTestCharacterStateData(id, spatial);
+        return new TestCharacterCreator.TestCharacterStateData(id, spatial);
     }
 }

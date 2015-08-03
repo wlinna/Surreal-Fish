@@ -32,6 +32,6 @@ public class DataRegistration {
         Serializer.registerClass(StateData.class);
 
         Serializer.registerClass(
-                TestCharacterCreator.CTestCharacterStateData.class);
+                TestCharacterCreator.TestCharacterStateData.class);
     }
 }
