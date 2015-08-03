@@ -17,6 +17,7 @@ import java.util.Map;
 import surrealfish.entity.CreationParams;
 import surrealfish.entity.EntityCreator;
 import surrealfish.entity.EntityCreatorRepo;
+import surrealfish.entity.ProjectileCreator;
 import surrealfish.entity.TestCharacterCreator;
 import surrealfish.net.Syncer;
 import surrealfish.net.commands.sync.CmdAddEntity;
@@ -29,6 +30,8 @@ public class Area extends AbstractAppState {
     private int idCounter = 0;
     private SimpleApplication app;
     private Syncer syncer;
+    
+    private long projectileSpawnTimer = 0;
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
@@ -52,6 +55,7 @@ public class Area extends AbstractAppState {
         app.getCamera().lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
 
         entityCreatorRepo.addCreator(new TestCharacterCreator());
+        entityCreatorRepo.addCreator(new ProjectileCreator());
     }
 
     public Spatial newEntity(int creatorId, Vector3f loc, Quaternion rot,
@@ -105,6 +109,11 @@ public class Area extends AbstractAppState {
     
     @Override
     public void update(float tpf) {
+        if (projectileSpawnTimer <= 0) {
+            projectileSpawnTimer = 200;
+            newEntity(1, new Vector3f(0,4,0), Quaternion.ZERO, -1);
+        }
+        projectileSpawnTimer -= tpf;
     }
 
     @Override
