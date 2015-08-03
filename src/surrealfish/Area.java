@@ -21,6 +21,7 @@ import surrealfish.entity.ProjectileCreator;
 import surrealfish.entity.TestCharacterCreator;
 import surrealfish.net.Syncer;
 import surrealfish.net.commands.sync.CmdAddEntity;
+import surrealfish.net.commands.sync.CmdRemoveEntity;
 
 public class Area extends AbstractAppState {
 
@@ -84,6 +85,20 @@ public class Area extends AbstractAppState {
         }
 
         return entity;
+    }
+    
+    public void removeEntity(int entityId) {
+        Spatial entity = entities.remove(entityId);
+        
+        if (entity == null) {
+            return;
+        }
+        syncer.removeEntity(entityId);
+        
+        Sender sender = app.getStateManager().getState(Sender.class);
+        if (!sender.isClient()) {
+            sender.addCommand(new CmdRemoveEntity(entityId));
+        }
     }
 
     public void informAboutEntities(HostedConnection conn) {

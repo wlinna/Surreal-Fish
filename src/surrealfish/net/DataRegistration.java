@@ -15,6 +15,7 @@ import surrealfish.net.commands.CmdServerLogin;
 import surrealfish.net.commands.CmdSetPlayersCharacter;
 import surrealfish.net.commands.CmdTopicOnly;
 import surrealfish.net.commands.sync.CmdAddEntity;
+import surrealfish.net.commands.sync.CmdRemoveEntity;
 import surrealfish.net.commands.sync.StateData;
 
 public class DataRegistration {
@@ -30,6 +31,7 @@ public class DataRegistration {
         Serializer.registerClass(CmdClientLogin.class);
 
         Serializer.registerClass(CmdAddEntity.class);
+        Serializer.registerClass(CmdRemoveEntity.class);
         Serializer.registerClass(StateData.class);
 
         Serializer.registerClass(
