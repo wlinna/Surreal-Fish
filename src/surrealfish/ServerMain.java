@@ -28,6 +28,7 @@ public class ServerMain extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        Globals.isClient = false;
         Globals.assetManager = assetManager;
         BulletAppState physics = new BulletAppState();
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);

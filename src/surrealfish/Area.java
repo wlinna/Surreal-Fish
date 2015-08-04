@@ -32,8 +32,7 @@ public class Area extends AbstractAppState {
     private int idCounter = 0;
     private SimpleApplication app;
     private Syncer syncer;
-    
-    private long projectileSpawnTimer = 0;
+    private float projectileSpawnTimer = 0;
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
@@ -87,15 +86,15 @@ public class Area extends AbstractAppState {
 
         return entity;
     }
-    
+
     public void removeEntity(int entityId) {
         Spatial entity = entities.remove(entityId);
-        
+
         if (entity == null) {
             return;
         }
         syncer.removeEntity(entityId);
-        
+
         Sender sender = app.getStateManager().getState(Sender.class);
         if (!sender.isClient()) {
             sender.addCommand(new CmdRemoveEntity(entityId));
@@ -122,16 +121,18 @@ public class Area extends AbstractAppState {
     public Spatial getEntity(int id) {
         return entities.get(id);
     }
-    
+
     @Override
-    public void update(float tpf) {
-        if (projectileSpawnTimer <= 0) {
-            projectileSpawnTimer = 200;
-            Spatial projectile = newEntity(1, new Vector3f(0,4,0), Quaternion.ZERO, -1);
-            CProjectile projectileControl = projectile.getControl(CProjectile.class);
-            projectileControl.setTarget(new Vector3f(0, -1, 0));
+    public void update(float tpf) {        
+        if (!Globals.isClient) {
+            if (projectileSpawnTimer <= 0) {
+                projectileSpawnTimer = 2;
+                Spatial projectile = newEntity(1, new Vector3f(0, 4, 0), Quaternion.ZERO, -1);
+                CProjectile projectileControl = projectile.getControl(CProjectile.class);
+                projectileControl.setTarget(new Vector3f(0, -1, 0));
+            }
+            projectileSpawnTimer -= tpf;
         }
-        projectileSpawnTimer -= tpf;
     }
 
     @Override

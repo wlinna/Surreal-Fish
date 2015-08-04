@@ -28,6 +28,7 @@ public class ClientMain extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        Globals.isClient = true;
         Globals.assetManager = assetManager;
 
         BulletAppState physics = new BulletAppState();
