@@ -19,6 +19,7 @@ import surrealfish.entity.EntityCreator;
 import surrealfish.entity.EntityCreatorRepo;
 import surrealfish.entity.ProjectileCreator;
 import surrealfish.entity.TestCharacterCreator;
+import surrealfish.entity.controls.CProjectile;
 import surrealfish.net.Syncer;
 import surrealfish.net.commands.sync.CmdAddEntity;
 import surrealfish.net.commands.sync.CmdRemoveEntity;
@@ -126,7 +127,9 @@ public class Area extends AbstractAppState {
     public void update(float tpf) {
         if (projectileSpawnTimer <= 0) {
             projectileSpawnTimer = 200;
-            newEntity(1, new Vector3f(0,4,0), Quaternion.ZERO, -1);
+            Spatial projectile = newEntity(1, new Vector3f(0,4,0), Quaternion.ZERO, -1);
+            CProjectile projectileControl = projectile.getControl(CProjectile.class);
+            projectileControl.setTarget(new Vector3f(0, -1, 0));
         }
         projectileSpawnTimer -= tpf;
     }
