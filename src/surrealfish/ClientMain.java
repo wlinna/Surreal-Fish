@@ -25,6 +25,7 @@ public class ClientMain extends SimpleApplication {
         app.pauseOnFocus = false;
         app.start();
     }
+    private NetworkClient client;
 
     @Override
     public void simpleInitApp() {
@@ -38,7 +39,7 @@ public class ClientMain extends SimpleApplication {
 
         DataRegistration.register();
 
-        final NetworkClient client = Network.createClient();
+        client = Network.createClient();
         Receiver receiver = new DefaultReceiver();
         stateManager.attach(receiver);
 
@@ -100,5 +101,13 @@ public class ClientMain extends SimpleApplication {
                 enqueue(f);
             }
         }, time);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        if (client != null && client.isConnected()) {
+            client.close();
+        }
     }
 }
