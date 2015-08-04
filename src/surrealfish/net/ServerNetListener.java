@@ -159,17 +159,9 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
 
                         PlayerData.setData(playerId, PlayerData.ENTITY_ID,
                                 entityId);
-
-                        delayed(new Callable<Void>() {
-                            @Override
-                            public Void call() throws Exception {
-
-                                sender.addCommand(new CmdSetPlayersCharacter(
-                                        entityId, playerId));
-                                return null;
-                            }
-                        }, 300);
-
+                        
+                        sender.addCommand(new CmdSetPlayersCharacter(
+                                entityId, playerId));
                         return null;
                     }
                 }, 100);
