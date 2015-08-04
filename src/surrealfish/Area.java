@@ -12,7 +12,9 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import surrealfish.entity.CreationParams;
 import surrealfish.entity.EntityCreator;
@@ -23,6 +25,7 @@ import surrealfish.entity.controls.CProjectile;
 import surrealfish.net.Syncer;
 import surrealfish.net.commands.sync.CmdAddEntity;
 import surrealfish.net.commands.sync.CmdRemoveEntity;
+import surrealfish.util.Timer;
 
 public class Area extends AbstractAppState {
 
@@ -32,8 +35,12 @@ public class Area extends AbstractAppState {
     private int idCounter = 0;
     private SimpleApplication app;
     private Syncer syncer;
-    private float projectileSpawnTimer = 0;
+    
+    private Timer projectileSpawnTimer = new Timer(2f);    
+    private Timer projectileRemoveTimer = new Timer(0f);
 
+    private List<Spatial> projectiles = new ArrayList<>();
+    
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
@@ -41,6 +48,9 @@ public class Area extends AbstractAppState {
         syncer = stateManager.getState(Syncer.class);
         syncer.addObject(-1, this);
         load();
+        
+        projectileSpawnTimer.setActive(true);
+        projectileRemoveTimer.setActive(true);
     }
 
     public void load() {
@@ -93,7 +103,10 @@ public class Area extends AbstractAppState {
         if (entity == null) {
             return;
         }
+        
         syncer.removeEntity(entityId);
+        
+        entity.removeFromParent();
 
         Sender sender = app.getStateManager().getState(Sender.class);
         if (!sender.isClient()) {
@@ -125,13 +138,30 @@ public class Area extends AbstractAppState {
     @Override
     public void update(float tpf) {        
         if (!Globals.isClient) {
-            if (projectileSpawnTimer <= 0) {
-                projectileSpawnTimer = 2;
-                Spatial projectile = newEntity(1, new Vector3f(0, 4, 0), Quaternion.ZERO, -1);
-                CProjectile projectileControl = projectile.getControl(CProjectile.class);
-                projectileControl.setTarget(new Vector3f(0, -1, 0));
+            projectileSpawnTimer.update(tpf);
+            projectileRemoveTimer.update(tpf);
+            
+            if (projectileSpawnTimer.timeJustEnded()) {
+                projectileSpawnTimer.setTimeLeft(2f);
+                Spatial projectile = newEntity(1,
+                        new Vector3f(0, 1, 0), Quaternion.ZERO, -1);
+                CProjectile projectileControl =
+                        projectile.getControl(CProjectile.class);
+                projectileControl.setTarget(new Vector3f(0, 0, 0));
+                
+                projectiles.add(projectile);
+                
+                projectileRemoveTimer.setTimeLeft(0.3f);
             }
-            projectileSpawnTimer -= tpf;
+            
+            if (projectileRemoveTimer.timeJustEnded()) {
+                if (!projectiles.isEmpty()) {
+                    Spatial removed = projectiles.remove(0);
+                    int entityId = removed.getUserData(UserData.ENTITY_ID);                    
+                    removeEntity(entityId);
+                }
+            }
+            
         }
     }
 
