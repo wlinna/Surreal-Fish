@@ -34,6 +34,10 @@ public class CProjectile extends AbstractControl implements CSync {
     @Override
     public void setSpatial(Spatial spatial) {
         super.setSpatial(spatial);
+        
+        if (spatial == null) {
+            return;
+        }
 
         ParticleEmitter emitter = new ParticleEmitter("My explosion effect",
                 ParticleMesh.Type.Triangle, 30);
