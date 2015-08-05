@@ -21,6 +21,8 @@ import surrealfish.PlayerData;
 import surrealfish.ServerInputListener;
 import surrealfish.ServerMain;
 import surrealfish.UserData;
+import surrealfish.entity.TestCharacterCreator;
+import surrealfish.entity.controls.CTestCharacter;
 import surrealfish.net.commands.CmdClientLogin;
 import surrealfish.net.commands.CmdServerLogin;
 import surrealfish.net.commands.CmdSetPlayersCharacter;
@@ -157,6 +159,10 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
 
                         Spatial entity = area.newEntity(0, Vector3f.ZERO,
                                 Quaternion.ZERO, playerId);
+                        entity.getControl(CTestCharacter.class)
+                                .setRelativeDirection(app.getStateManager()
+                                .getState(ServerInputListener.class)
+                                .getInput(playerId).getRelativeDirection());
 
                         final int entityId = entity
                                 .getUserData(UserData.ENTITY_ID);

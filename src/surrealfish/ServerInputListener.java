@@ -39,4 +39,8 @@ public class ServerInputListener extends AbstractAppState
     @Override
     public void readUnreliable(Object o, Command cmd) {
     }
+    
+    public Input getInput(int playerId) {
+        return inputs.get(playerId);
+    }
 }

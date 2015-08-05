@@ -40,8 +40,6 @@ public class Input {
         relativeDirection.z = -forward;
         
         relativeDirection.normalizeLocal();
-        
-        System.out.println("Relative direction: " + relativeDirection.x + " " + relativeDirection.z);
     }
 
     public Vector3f getRelativeDirection() {
