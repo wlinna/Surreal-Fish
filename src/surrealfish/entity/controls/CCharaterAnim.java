@@ -50,7 +50,7 @@ public class CCharaterAnim extends AbstractControl implements AnimEventListener 
             control.addListener(this);
             AnimChannel channel = control.createChannel();
             channel.setAnim("Walk");
-            channel.setSpeed(0f);
+            channel.setSpeed(1f);
             channelList.add(channel);
         }
     }

@@ -16,6 +16,8 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
@@ -39,6 +41,7 @@ public class IlkkaMain extends SimpleApplication
     private CameraNode camNode;
     private Vector2f oldMousePos;
     private BitmapText hudText;
+    private Vector3f targetDirection = new Vector3f(0, 0, -1f);
     Node player;
     float walkTime = 0;
 
@@ -90,7 +93,7 @@ public class IlkkaMain extends SimpleApplication
         camNode.setLocalTranslation(new Vector3f(0, 5, 10));
         camNode.lookAt(player.getLocalTranslation(), Vector3f.UNIT_Y);
 
-        ChaseCamera chaseCam = new ChaseCamera(cam, player, inputManager);
+        //ChaseCamera chaseCam = new ChaseCamera(cam, player, inputManager);
 
         // Test multiple inputs per mapping
         inputManager.addMapping("Forward", new KeyTrigger(KeyInput.KEY_W));
@@ -123,10 +126,36 @@ public class IlkkaMain extends SimpleApplication
 
         
         if (inputManager.getCursorPosition().x != oldMousePos.x) {
-            float dx = inputManager.getCursorPosition().x - oldMousePos.x;
-            player.rotate(0, -dx * 0.01f, 0);
+            float dx = inputManager.getCursorPosition().x - oldMousePos.x;            
             oldMousePos.set(inputManager.getCursorPosition());
+            Quaternion q = new Quaternion();
+            q.fromAngles(0, -dx * 0.01f, 0);
+            targetDirection = q.mult(targetDirection);
         }
+        hudText.setText(targetDirection.toString());
+        if (!getForward(player).equals(targetDirection)) {
+            Vector3f side = getForward(player).cross(Vector3f.UNIT_Y);
+            float sideDot = side.dot(targetDirection);
+            if (targetDirection.angleBetween(getForward(player)) <= 10f * tpf) {
+                if (sideDot > 0) {
+                    player.rotate(0, -targetDirection.angleBetween(getForward(player)), 0);
+                } else {
+                    player.rotate(0, targetDirection.angleBetween(getForward(player)), 0);
+                }
+            } else {
+                if (sideDot > 0) {
+                    player.rotate(0, -10 * tpf, 0);
+                } else {
+                    player.rotate(0, 10f * tpf, 0);
+                }
+            }
+
+
+
+        }
+
+
+
     }
 
     @Override
