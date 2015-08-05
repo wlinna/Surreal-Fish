@@ -31,7 +31,8 @@ public class OwnPlayer extends AbstractAppState implements CommandHandler {
         if (aCmd instanceof CmdSetPlayersCharacter) {
             CmdSetPlayersCharacter cmd = (CmdSetPlayersCharacter) aCmd;
             if (cmd.getPlayerId() == playerId) {
-                entityId = cmd.getEntityId();               
+                entityId = cmd.getEntityId(); 
+                app.getStateManager().attach(new ClientInputListener());
             }
         }
     }
