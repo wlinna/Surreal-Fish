@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import surrealfish.Area;
 import surrealfish.PlayerData;
+import surrealfish.ServerInputListener;
 import surrealfish.ServerMain;
 import surrealfish.UserData;
 import surrealfish.net.commands.CmdClientLogin;
@@ -136,6 +137,9 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
                 ServerClientData.setPlayerId(clientId, playerId);
                 ServerClientData.addConnection(playerId, source);
 
+                app.getStateManager().getState(ServerInputListener.class)
+                        .addPlayer(playerId);
+
                 CmdServerLogin serverLoginMessage =
                         new CmdServerLogin(commmand.getName(), playerId, true);
                 someoneJoined = true;
@@ -159,7 +163,7 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
 
                         PlayerData.setData(playerId, PlayerData.ENTITY_ID,
                                 entityId);
-                        
+
                         sender.addCommand(new CmdSetPlayersCharacter(
                                 entityId, playerId));
                         return null;

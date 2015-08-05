@@ -54,6 +54,9 @@ public class ServerMain extends SimpleApplication {
         server.addConnectionListener(netListener);
         Area world = new Area();
         
+        ServerInputListener inputListener = new ServerInputListener();
+        receiver.registerCommandHandler(inputListener);
+        
         Syncer syncer = new Syncer();
         receiver.registerCommandHandler(syncer);
 
@@ -63,6 +66,7 @@ public class ServerMain extends SimpleApplication {
         stateManager.attach(receiver);
         stateManager.attach(sender);
         stateManager.attach(world);
+        stateManager.attach(inputListener);
         stateManager.attach(syncer);
     }
 

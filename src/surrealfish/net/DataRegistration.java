@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package surrealfish.net;
 
 import arkhados.net.Ack;
@@ -17,6 +13,7 @@ import surrealfish.net.commands.CmdTopicOnly;
 import surrealfish.net.commands.sync.CmdAddEntity;
 import surrealfish.net.commands.sync.CmdRemoveEntity;
 import surrealfish.net.commands.sync.StateData;
+import surrealfish.net.commands.sync.client.CmdButtons;
 
 public class DataRegistration {
 
@@ -33,6 +30,8 @@ public class DataRegistration {
         Serializer.registerClass(CmdAddEntity.class);
         Serializer.registerClass(CmdRemoveEntity.class);
         Serializer.registerClass(StateData.class);
+        
+        Serializer.registerClass(CmdButtons.class);
 
         Serializer.registerClass(
                 TestCharacterCreator.TestCharacterStateData.class);
