@@ -20,38 +20,35 @@ public class ProjectileCreator implements EntityCreator {
         projectile.addControl(new CProjectile());
         return projectile;
     }
-    
-    
-        @Serializable
-        public static class ProjectileStateData extends StateData {
-            
-            private Vector3f loc;
-            private Quaternion rot;
-            private Vector3f vel;
-            
-            public ProjectileStateData() {
-            }
 
-            public ProjectileStateData(int syncId, Spatial spatial) {
-                super(syncId);
-                this.loc = spatial.getLocalTranslation();
-                this.rot = spatial.getLocalRotation();
-                this.vel = spatial.getControl(CProjectile.class).getVelocity();
-            }
+    @Serializable
+    public static class ProjectileStateData extends StateData {
 
-            @Override
-            public void applyData(Object target) {
-                Spatial spatial = (Spatial) target;
-                spatial.setLocalTranslation(loc);
-                spatial.setLocalRotation(rot);
-                spatial.getControl(CProjectile.class).setVelocity(vel);
-            }
+        private Vector3f loc = new Vector3f();
+        private Quaternion rot = new Quaternion();
+        private Vector3f vel = new Vector3f();
 
-            @Override
-            public boolean isGuaranteed() {
-                return false;
-            }
-            
+        public ProjectileStateData() {
         }
 
+        public ProjectileStateData(int syncId, Spatial spatial) {
+            super(syncId);
+            loc.set(spatial.getLocalTranslation());
+            rot.set(spatial.getLocalRotation());
+            vel.set(spatial.getControl(CProjectile.class).getVelocity());
+        }
+
+        @Override
+        public void applyData(Object target) {
+            Spatial spatial = (Spatial) target;
+            spatial.setLocalTranslation(loc);
+            spatial.setLocalRotation(rot);
+            spatial.getControl(CProjectile.class).setVelocity(vel);
+        }
+
+        @Override
+        public boolean isGuaranteed() {
+            return false;
+        }
+    }
 }
