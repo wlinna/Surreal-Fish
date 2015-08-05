@@ -7,7 +7,10 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.light.DirectionalLight;
+import com.jme3.math.Plane;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
@@ -57,7 +60,14 @@ public class Area extends AbstractAppState {
     public void load() {
         worldRoot = (Node) app.getAssetManager()
                 .loadModel("Scenes/newScene.j3o");
+        
+        RigidBodyControl physics = new RigidBodyControl(
+                new PlaneCollisionShape(new Plane(Vector3f.UNIT_Y, 0)), 0);
+        worldRoot.addControl(physics);
+        
         app.getRootNode().attachChild(worldRoot);
+        app.getStateManager().getState(BulletAppState.class).getPhysicsSpace()
+                .addAll(worldRoot);
 
         DirectionalLight sun = new DirectionalLight();
         sun.setDirection(new Vector3f(-0.1f, -1f, -1));
@@ -149,10 +159,10 @@ public class Area extends AbstractAppState {
             if (projectileSpawnTimer.timeJustEnded()) {
                 projectileSpawnTimer.setTimeLeft(2f);
                 Spatial projectile = newEntity(1,
-                        new Vector3f(-3, 1, 0), Quaternion.ZERO, -1);
+                        new Vector3f(-3, 2, 0), Quaternion.ZERO, -1);
                 CProjectile projectileControl =
                         projectile.getControl(CProjectile.class);
-                projectileControl.setTarget(new Vector3f(1, 1, 0));
+                projectileControl.setTarget(new Vector3f(1, 0, 4));
                 
                 projectiles.add(projectile);
                 

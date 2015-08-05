@@ -1,5 +1,8 @@
 package surrealfish.entity.controls;
 
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.PhysicsTickListener;
+import com.jme3.bullet.control.GhostControl;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
 import com.jme3.material.Material;
@@ -15,17 +18,20 @@ import surrealfish.UserData;
 import surrealfish.entity.ProjectileCreator;
 import surrealfish.net.commands.sync.StateData;
 
-public class CProjectile extends AbstractControl implements CSync {
+public class CProjectile extends AbstractControl implements CSync, PhysicsTickListener {
 
     private Vector3f direction = new Vector3f();
     private Vector3f velocity = new Vector3f();
     private float projectileSpeed = 7f;
+    
+    private GhostControl ghostControl;
 
     @Override
     protected void controlUpdate(float tpf) {
         direction.mult(projectileSpeed * tpf, velocity);
         spatial.move(velocity);
     }
+    
 
     @Override
     protected void controlRender(RenderManager rm, ViewPort vp) {
@@ -38,6 +44,7 @@ public class CProjectile extends AbstractControl implements CSync {
         if (spatial == null) {
             return;
         }
+        ghostControl = spatial.getControl(GhostControl.class);
 
         ParticleEmitter emitter = new ParticleEmitter("My explosion effect",
                 ParticleMesh.Type.Triangle, 30);
@@ -58,6 +65,15 @@ public class CProjectile extends AbstractControl implements CSync {
         emitter.getParticleInfluencer().setVelocityVariation(.3f);
 
         ((Node) spatial).attachChild(emitter);
+    }
+
+    @Override
+    public void prePhysicsTick(PhysicsSpace space, float tpf) {
+    }
+
+    @Override
+    public void physicsTick(PhysicsSpace space, float tpf) {
+        System.out.println(ghostControl.getOverlappingObjects());
     }
 
     @Override
