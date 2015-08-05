@@ -144,14 +144,14 @@ public class Area extends AbstractAppState {
             if (projectileSpawnTimer.timeJustEnded()) {
                 projectileSpawnTimer.setTimeLeft(2f);
                 Spatial projectile = newEntity(1,
-                        new Vector3f(0, 1, 0), Quaternion.ZERO, -1);
+                        new Vector3f(-3, 1, 0), Quaternion.ZERO, -1);
                 CProjectile projectileControl =
                         projectile.getControl(CProjectile.class);
-                projectileControl.setTarget(new Vector3f(0, 0, 0));
+                projectileControl.setTarget(new Vector3f(1, 1, 0));
                 
                 projectiles.add(projectile);
                 
-                projectileRemoveTimer.setTimeLeft(0.3f);
+                projectileRemoveTimer.setTimeLeft(1f);
             }
             
             if (projectileRemoveTimer.timeJustEnded()) {

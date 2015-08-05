@@ -17,12 +17,17 @@ import surrealfish.net.commands.sync.StateData;
 
 public class CProjectile extends AbstractControl implements CSync {
 
-    private Vector3f direction = new Vector3f(0, -1, 0);
+    private Vector3f direction = new Vector3f();
+    private Vector3f target = new Vector3f();
     private Vector3f velocity = new Vector3f();
-    private float projectileSpeed = 3f;
+    private float projectileSpeed = 7f;
+    private boolean homing = false;
 
     @Override
     protected void controlUpdate(float tpf) {
+        if (homing) {
+            direction = target.subtract(spatial.getLocalTranslation()).normalize();
+        }
         direction.mult(projectileSpeed * tpf, velocity);
         spatial.move(velocity);
     }
@@ -65,8 +70,32 @@ public class CProjectile extends AbstractControl implements CSync {
         int id = spatial.getUserData(UserData.ENTITY_ID);
         return new ProjectileCreator.ProjectileStateData(id, spatial);
     }
+    
+    public Vector3f getTarget() {
+        return this.target;
+    }
 
-    public void setTarget(Vector3f dir) {
-        direction.set(dir);
+    /**
+     * Set target vector the projectile should aim at.
+     * @return 
+     */
+    public void setTarget(Vector3f tar) {
+        if (homing) {
+            target.set(tar);
+        }
+        direction = tar.subtract(spatial.getLocalTranslation()).normalize();
+    }
+    public Vector3f getDirection() {
+        return this.direction;
+    }
+    
+    /**
+     * <b>Only to be used used in ProjectileStateData</b>
+     * @see surrealfish.entity.ProjectileCreator.ProjectileStateData
+     * @see surrealfish.entity.controls.CProjectile CProjectile.setTarget()
+     */
+    @Deprecated
+    public void setDirection(Vector3f dir) {
+        this.direction.set(dir);
     }
 }

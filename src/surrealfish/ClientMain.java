@@ -36,6 +36,9 @@ public class ClientMain extends SimpleApplication {
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         stateManager.attach(physics);
         physics.getPhysicsSpace().setAccuracy(1 / 30f);
+        
+        // Bullet debug
+        physics.setDebugEnabled(true);
 
         DataRegistration.register();
 
