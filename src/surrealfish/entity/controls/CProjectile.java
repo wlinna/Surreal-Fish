@@ -2,36 +2,33 @@ package surrealfish.entity.controls;
 
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.PhysicsTickListener;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.GhostControl;
-import com.jme3.effect.ParticleEmitter;
-import com.jme3.effect.ParticleMesh;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
+import com.jme3.bullet.control.PhysicsControl;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
-import surrealfish.Globals;
+import java.util.List;
 import surrealfish.UserData;
 import surrealfish.entity.ProjectileCreator;
 import surrealfish.net.commands.sync.StateData;
 
-public class CProjectile extends AbstractControl implements CSync, PhysicsTickListener {
+public class CProjectile extends AbstractControl implements CSync,
+        PhysicsControl, PhysicsTickListener {
 
     private Vector3f direction = new Vector3f();
     private Vector3f velocity = new Vector3f();
     private float projectileSpeed = 7f;
-    
     private GhostControl ghostControl;
+    private PhysicsSpace space;
 
     @Override
     protected void controlUpdate(float tpf) {
         direction.mult(projectileSpeed * tpf, velocity);
         spatial.move(velocity);
     }
-    
 
     @Override
     protected void controlRender(RenderManager rm, ViewPort vp) {
@@ -40,31 +37,12 @@ public class CProjectile extends AbstractControl implements CSync, PhysicsTickLi
     @Override
     public void setSpatial(Spatial spatial) {
         super.setSpatial(spatial);
-        
+
         if (spatial == null) {
             return;
         }
+
         ghostControl = spatial.getControl(GhostControl.class);
-
-        ParticleEmitter emitter = new ParticleEmitter("My explosion effect",
-                ParticleMesh.Type.Triangle, 30);
-        Material mat = new Material(Globals.assetManager,
-                "Common/MatDefs/Misc/Particle.j3md");
-        mat.setTexture("Texture", Globals.assetManager.loadTexture(
-                "Textures/flame.png"));
-        emitter.setMaterial(mat);
-        emitter.setImagesX(2);
-        emitter.setImagesY(2);
-        emitter.setEndColor(new ColorRGBA(1f, 0f, 0f, 1f));
-        emitter.setStartColor(new ColorRGBA(1f, 1f, 0f, 0.5f));
-        emitter.setStartSize(.5f);
-        emitter.setEndSize(.1f);
-        emitter.setGravity(0, 0, 0);
-        emitter.setLowLife(.3f);
-        emitter.setHighLife(1f);
-        emitter.getParticleInfluencer().setVelocityVariation(.3f);
-
-        ((Node) spatial).attachChild(emitter);
     }
 
     @Override
@@ -73,7 +51,9 @@ public class CProjectile extends AbstractControl implements CSync, PhysicsTickLi
 
     @Override
     public void physicsTick(PhysicsSpace space, float tpf) {
-        System.out.println(ghostControl.getOverlappingObjects());
+        List<PhysicsCollisionObject> overlappingObjects = ghostControl.getOverlappingObjects();
+        if (overlappingObjects.size() > 0) {
+        }
     }
 
     @Override
@@ -83,13 +63,31 @@ public class CProjectile extends AbstractControl implements CSync, PhysicsTickLi
     }
 
     public void setTarget(Vector3f tar) {
-        direction = tar.subtract(spatial.getLocalTranslation()).normalize();
+        direction = tar.subtract(spatial.getLocalTranslation()).normalizeLocal();
     }
+
     public Vector3f getVelocity() {
-        return this.velocity;
+        return velocity;
     }
-    
+
     public void setVelocity(Vector3f vel) {
-        this.velocity.set(vel);
+        velocity.set(vel);
+    }
+
+    @Override
+    public void setPhysicsSpace(PhysicsSpace space) {
+        if (space == null) {
+            this.space.removeTickListener(this);
+            return;
+        }
+
+        this.space = space;
+
+        space.addTickListener(this);
+    }
+
+    @Override
+    public PhysicsSpace getPhysicsSpace() {
+        return space;
     }
 }

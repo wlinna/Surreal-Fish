@@ -7,10 +7,9 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
+import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.light.DirectionalLight;
-import com.jme3.math.Plane;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
@@ -29,6 +28,7 @@ import surrealfish.entity.controls.CProjectile;
 import surrealfish.net.Syncer;
 import surrealfish.net.commands.sync.CmdAddEntity;
 import surrealfish.net.commands.sync.CmdRemoveEntity;
+import surrealfish.util.PhysicsWorkaround;
 import surrealfish.util.Timer;
 
 public class Area extends AbstractAppState {
@@ -39,12 +39,10 @@ public class Area extends AbstractAppState {
     private int idCounter = 0;
     private SimpleApplication app;
     private Syncer syncer;
-    
-    private Timer projectileSpawnTimer = new Timer(2f);    
+    private Timer projectileSpawnTimer = new Timer(2f);
     private Timer projectileRemoveTimer = new Timer(0f);
-
     private List<Spatial> projectiles = new ArrayList<>();
-    
+
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
@@ -52,7 +50,7 @@ public class Area extends AbstractAppState {
         syncer = stateManager.getState(Syncer.class);
         syncer.addObject(-1, this);
         load();
-        
+
         projectileSpawnTimer.setActive(true);
         projectileRemoveTimer.setActive(true);
     }
@@ -60,12 +58,13 @@ public class Area extends AbstractAppState {
     public void load() {
         worldRoot = (Node) app.getAssetManager()
                 .loadModel("Scenes/newScene.j3o");
-        
-        RigidBodyControl physics = new RigidBodyControl(
-                new PlaneCollisionShape(new Plane(Vector3f.UNIT_Y, 0)), 0);
-        worldRoot.addControl(physics);
-        
         app.getRootNode().attachChild(worldRoot);
+
+        RigidBodyControl physics = new RigidBodyControl(0);
+        physics.setCollideWithGroups(RigidBodyControl.COLLISION_GROUP_NONE);
+
+        worldRoot.getChild(0).addControl(physics);
+
         app.getStateManager().getState(BulletAppState.class).getPhysicsSpace()
                 .addAll(worldRoot);
 
@@ -95,8 +94,10 @@ public class Area extends AbstractAppState {
         entity.setUserData(UserData.PLAYER_ID, playerId);
 
         worldRoot.attachChild(entity);
-        app.getStateManager().getState(BulletAppState.class)
-                .getPhysicsSpace().addAll(entity);
+        PhysicsSpace space = app.getStateManager()
+                .getState(BulletAppState.class).getPhysicsSpace();
+
+        PhysicsWorkaround.addAll(space, entity);
 
         entities.put(entityId, entity);
         syncer.addObject(entityId, entity);
@@ -116,11 +117,12 @@ public class Area extends AbstractAppState {
         if (entity == null) {
             return;
         }
-        
+
         syncer.removeEntity(entityId);
-        
-        app.getStateManager().getState(BulletAppState.class)
-                .getPhysicsSpace().removeAll(entity);
+
+        PhysicsSpace space = app.getStateManager().getState(BulletAppState.class)
+                .getPhysicsSpace();
+        PhysicsWorkaround.removeAll(space, entity);
         entity.removeFromParent();
 
         Sender sender = app.getStateManager().getState(Sender.class);
@@ -151,32 +153,32 @@ public class Area extends AbstractAppState {
     }
 
     @Override
-    public void update(float tpf) {        
+    public void update(float tpf) {
         if (!Globals.isClient) {
             projectileSpawnTimer.update(tpf);
             projectileRemoveTimer.update(tpf);
-            
+
             if (projectileSpawnTimer.timeJustEnded()) {
                 projectileSpawnTimer.setTimeLeft(2f);
                 Spatial projectile = newEntity(1,
-                        new Vector3f(-3, 2, 0), Quaternion.ZERO, -1);
+                        new Vector3f(-3, 4, 0), Quaternion.ZERO, -1);
                 CProjectile projectileControl =
                         projectile.getControl(CProjectile.class);
-                projectileControl.setTarget(new Vector3f(1, 0, 4));
-                
+                projectileControl.setTarget(new Vector3f(0, 0, 0));
+
                 projectiles.add(projectile);
-                
+
                 projectileRemoveTimer.setTimeLeft(1f);
             }
-            
+
             if (projectileRemoveTimer.timeJustEnded()) {
                 if (!projectiles.isEmpty()) {
                     Spatial removed = projectiles.remove(0);
-                    int entityId = removed.getUserData(UserData.ENTITY_ID);                    
+                    int entityId = removed.getUserData(UserData.ENTITY_ID);
                     removeEntity(entityId);
                 }
             }
-            
+
         }
     }
 
