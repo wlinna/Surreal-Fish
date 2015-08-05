@@ -17,6 +17,7 @@ public class ProjectileCreator implements EntityCreator {
         Node projectile = new Node("Projectile");
         projectile.setLocalTranslation(params.location);
         projectile.addControl(new CProjectile());
+        projectile.addControl(new GhostControl(new SphereCollisionShape(.3f)));
         return projectile;
     }
     
@@ -26,8 +27,7 @@ public class ProjectileCreator implements EntityCreator {
             
             private Vector3f loc;
             private Quaternion rot;
-            private Vector3f dir;
-            private Vector3f tar;
+            private Vector3f vel;
             
             public ProjectileStateData() {
             }
@@ -36,8 +36,7 @@ public class ProjectileCreator implements EntityCreator {
                 super(syncId);
                 this.loc = spatial.getLocalTranslation();
                 this.rot = spatial.getLocalRotation();
-                this.dir = spatial.getControl(CProjectile.class).getDirection();
-                this.tar = spatial.getControl(CProjectile.class).getTarget();
+                this.vel = spatial.getControl(CProjectile.class).getVelocity();
             }
 
             @Override
@@ -45,8 +44,7 @@ public class ProjectileCreator implements EntityCreator {
                 Spatial spatial = (Spatial) target;
                 spatial.setLocalTranslation(loc);
                 spatial.setLocalRotation(rot);
-                spatial.getControl(CProjectile.class).setDirection(dir);
-                spatial.getControl(CProjectile.class).setTarget(tar);
+                spatial.getControl(CProjectile.class).setVelocity(vel);
             }
 
             @Override
