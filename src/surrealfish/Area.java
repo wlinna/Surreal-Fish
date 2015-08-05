@@ -6,6 +6,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.bullet.BulletAppState;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -84,6 +85,8 @@ public class Area extends AbstractAppState {
         entity.setUserData(UserData.PLAYER_ID, playerId);
 
         worldRoot.attachChild(entity);
+        app.getStateManager().getState(BulletAppState.class)
+                .getPhysicsSpace().addAll(entity);
 
         entities.put(entityId, entity);
         syncer.addObject(entityId, entity);
@@ -106,6 +109,8 @@ public class Area extends AbstractAppState {
         
         syncer.removeEntity(entityId);
         
+        app.getStateManager().getState(BulletAppState.class)
+                .getPhysicsSpace().removeAll(entity);
         entity.removeFromParent();
 
         Sender sender = app.getStateManager().getState(Sender.class);
