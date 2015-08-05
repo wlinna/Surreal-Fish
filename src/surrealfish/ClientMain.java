@@ -10,6 +10,7 @@ import com.jme3.network.Network;
 import com.jme3.network.NetworkClient;
 import com.jme3.renderer.RenderManager;
 import java.io.IOException;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,27 +25,31 @@ public class ClientMain extends SimpleApplication {
         app.pauseOnFocus = false;
         app.start();
     }
-    // TODO: Remove this. It's temporarily here
-    public static int playerId = -1;
+    private NetworkClient client;
 
     @Override
     public void simpleInitApp() {
+        Globals.isClient = true;
         Globals.assetManager = assetManager;
 
         BulletAppState physics = new BulletAppState();
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         stateManager.attach(physics);
         physics.getPhysicsSpace().setAccuracy(1 / 30f);
+        
+        // Bullet debug
+        physics.setDebugEnabled(true);
 
         DataRegistration.register();
 
-        final NetworkClient client = Network.createClient();
+        client = Network.createClient();
         Receiver receiver = new DefaultReceiver();
         stateManager.attach(receiver);
 
         client.addMessageListener(receiver, OneTrueMessage.class);
 
         ClientNetListener netListener = new ClientNetListener();
+        netListener.setName("" + new Random().nextInt());
         client.addClientStateListener(netListener);
         receiver.registerCommandHandler(netListener);
         stateManager.attach(netListener);
@@ -60,6 +65,9 @@ public class ClientMain extends SimpleApplication {
         receiver.registerCommandHandler(syncer);
         stateManager.attach(syncer);
 
+        OwnPlayer own = new OwnPlayer();
+        receiver.registerCommandHandler(own);
+        stateManager.attach(own);
         // FIXME: We use delay because otherwise getLastReceivedOrderNum
         // would fail
         delayed(new Callable<Void>() {
@@ -96,5 +104,13 @@ public class ClientMain extends SimpleApplication {
                 enqueue(f);
             }
         }, time);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        if (client != null && client.isConnected()) {
+            client.close();
+        }
     }
 }

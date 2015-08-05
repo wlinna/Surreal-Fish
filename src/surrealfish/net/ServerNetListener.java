@@ -18,8 +18,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import surrealfish.Area;
 import surrealfish.PlayerData;
+import surrealfish.ServerInputListener;
 import surrealfish.ServerMain;
 import surrealfish.UserData;
+import surrealfish.entity.TestCharacterCreator;
+import surrealfish.entity.controls.CTestCharacter;
 import surrealfish.net.commands.CmdClientLogin;
 import surrealfish.net.commands.CmdServerLogin;
 import surrealfish.net.commands.CmdSetPlayersCharacter;
@@ -136,6 +139,9 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
                 ServerClientData.setPlayerId(clientId, playerId);
                 ServerClientData.addConnection(playerId, source);
 
+                app.getStateManager().getState(ServerInputListener.class)
+                        .addPlayer(playerId);
+
                 CmdServerLogin serverLoginMessage =
                         new CmdServerLogin(commmand.getName(), playerId, true);
                 someoneJoined = true;
@@ -150,21 +156,25 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
                         Area area = app.getStateManager().getState(Area.class);
 
                         area.informAboutEntities(source);
-                        
+
                         Spatial entity = area.newEntity(0, Vector3f.ZERO,
                                 Quaternion.ZERO, playerId);
+                        entity.getControl(CTestCharacter.class)
+                                .setRelativeDirection(app.getStateManager()
+                                .getState(ServerInputListener.class)
+                                .getInput(playerId).getRelativeDirection());
 
-                        int entityId = entity.getUserData(UserData.ENTITY_ID);
+                        final int entityId = entity
+                                .getUserData(UserData.ENTITY_ID);
 
                         PlayerData.setData(playerId, PlayerData.ENTITY_ID,
                                 entityId);
 
-                        sender.addCommand(
-                                new CmdSetPlayersCharacter(entityId, playerId));
-
+                        sender.addCommand(new CmdSetPlayersCharacter(
+                                entityId, playerId));
                         return null;
                     }
-                }, 200);
+                }, 100);
 
                 return null;
             }

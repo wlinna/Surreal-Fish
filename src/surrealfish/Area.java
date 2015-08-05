@@ -6,20 +6,30 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import surrealfish.entity.CreationParams;
 import surrealfish.entity.EntityCreator;
 import surrealfish.entity.EntityCreatorRepo;
+import surrealfish.entity.ProjectileCreator;
 import surrealfish.entity.TestCharacterCreator;
+import surrealfish.entity.controls.CProjectile;
 import surrealfish.net.Syncer;
 import surrealfish.net.commands.sync.CmdAddEntity;
+import surrealfish.net.commands.sync.CmdRemoveEntity;
+import surrealfish.util.PhysicsWorkaround;
+import surrealfish.util.Timer;
 
 public class Area extends AbstractAppState {
 
@@ -29,6 +39,9 @@ public class Area extends AbstractAppState {
     private int idCounter = 0;
     private SimpleApplication app;
     private Syncer syncer;
+    private Timer projectileSpawnTimer = new Timer(2f);
+    private Timer projectileRemoveTimer = new Timer(0f);
+    private List<Spatial> projectiles = new ArrayList<>();
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
@@ -37,12 +50,23 @@ public class Area extends AbstractAppState {
         syncer = stateManager.getState(Syncer.class);
         syncer.addObject(-1, this);
         load();
+
+        projectileSpawnTimer.setActive(true);
+        projectileRemoveTimer.setActive(true);
     }
 
     public void load() {
         worldRoot = (Node) app.getAssetManager()
                 .loadModel("Scenes/newScene.j3o");
         app.getRootNode().attachChild(worldRoot);
+
+        RigidBodyControl physics = new RigidBodyControl(0);
+        physics.setCollideWithGroups(RigidBodyControl.COLLISION_GROUP_NONE);
+
+        worldRoot.getChild(0).addControl(physics);
+
+        app.getStateManager().getState(BulletAppState.class).getPhysicsSpace()
+                .addAll(worldRoot);
 
         DirectionalLight sun = new DirectionalLight();
         sun.setDirection(new Vector3f(-0.1f, -1f, -1));
@@ -52,6 +76,7 @@ public class Area extends AbstractAppState {
         app.getCamera().lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
 
         entityCreatorRepo.addCreator(new TestCharacterCreator());
+        entityCreatorRepo.addCreator(new ProjectileCreator());
     }
 
     public Spatial newEntity(int creatorId, Vector3f loc, Quaternion rot,
@@ -62,13 +87,17 @@ public class Area extends AbstractAppState {
     public Spatial addEntity(int creatorId, int entityId, Vector3f loc,
             Quaternion rot, int playerId) {
         EntityCreator creator = entityCreatorRepo.creator(creatorId);
-        Spatial entity = creator.create(new CreationParams(creatorId, loc));
+        Spatial entity = creator.create(new CreationParams(loc));
 
         entity.setUserData(UserData.CREATOR_ID, creatorId);
         entity.setUserData(UserData.ENTITY_ID, entityId);
         entity.setUserData(UserData.PLAYER_ID, playerId);
 
         worldRoot.attachChild(entity);
+        PhysicsSpace space = app.getStateManager()
+                .getState(BulletAppState.class).getPhysicsSpace();
+
+        PhysicsWorkaround.addAll(space, entity);
 
         entities.put(entityId, entity);
         syncer.addObject(entityId, entity);
@@ -80,6 +109,26 @@ public class Area extends AbstractAppState {
         }
 
         return entity;
+    }
+
+    public void removeEntity(int entityId) {
+        Spatial entity = entities.remove(entityId);
+
+        if (entity == null) {
+            return;
+        }
+
+        syncer.removeEntity(entityId);
+
+        PhysicsSpace space = app.getStateManager().getState(BulletAppState.class)
+                .getPhysicsSpace();
+        PhysicsWorkaround.removeAll(space, entity);
+        entity.removeFromParent();
+
+        Sender sender = app.getStateManager().getState(Sender.class);
+        if (!sender.isClient()) {
+            sender.addCommand(new CmdRemoveEntity(entityId));
+        }
     }
 
     public void informAboutEntities(HostedConnection conn) {
@@ -99,8 +148,38 @@ public class Area extends AbstractAppState {
         }
     }
 
+    public Spatial getEntity(int id) {
+        return entities.get(id);
+    }
+
     @Override
     public void update(float tpf) {
+        if (!Globals.isClient) {
+            projectileSpawnTimer.update(tpf);
+            projectileRemoveTimer.update(tpf);
+
+            if (projectileSpawnTimer.timeJustEnded()) {
+                projectileSpawnTimer.setTimeLeft(2f);
+                Spatial projectile = newEntity(1,
+                        new Vector3f(-3, 4, 0), Quaternion.ZERO, -1);
+                CProjectile projectileControl =
+                        projectile.getControl(CProjectile.class);
+                projectileControl.setTarget(new Vector3f(0, 0, 0));
+
+                projectiles.add(projectile);
+
+                projectileRemoveTimer.setTimeLeft(1f);
+            }
+
+            if (projectileRemoveTimer.timeJustEnded()) {
+                if (!projectiles.isEmpty()) {
+                    Spatial removed = projectiles.remove(0);
+                    int entityId = removed.getUserData(UserData.ENTITY_ID);
+                    removeEntity(entityId);
+                }
+            }
+
+        }
     }
 
     @Override
