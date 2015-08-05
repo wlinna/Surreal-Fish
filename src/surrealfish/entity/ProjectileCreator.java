@@ -17,7 +17,6 @@ public class ProjectileCreator implements EntityCreator {
         Node projectile = new Node("Projectile");
         projectile.setLocalTranslation(params.location);
         projectile.addControl(new CProjectile());
-        projectile.addControl(new GhostControl(new SphereCollisionShape(1f)));
         return projectile;
     }
     
