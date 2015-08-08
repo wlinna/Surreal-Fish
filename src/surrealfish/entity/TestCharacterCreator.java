@@ -5,8 +5,11 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Spatial;
 import surrealfish.Globals;
+import surrealfish.entity.controls.CActionQueue;
+import surrealfish.entity.controls.CSpell;
 import surrealfish.entity.controls.CTestCharacter;
 import surrealfish.net.commands.sync.StateData;
+import surrealfish.spell.Spell;
 
 public class TestCharacterCreator implements EntityCreator {
 
@@ -15,6 +18,12 @@ public class TestCharacterCreator implements EntityCreator {
         Spatial model = Globals.assetManager.loadModel("Models/testiUkko.j3o");
         model.setLocalTranslation(params.location);
         model.addControl(new CTestCharacter());
+        model.addControl(new CActionQueue());
+        
+        CSpell cSpell = new CSpell();
+        cSpell.addSpell(Spell.byName("FireStuff"));
+        
+        model.addControl(cSpell);
         return model;
     }
 
