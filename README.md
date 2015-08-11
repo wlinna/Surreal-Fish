@@ -1,4 +1,4 @@
 # Surreal-Fish
 Surreal Fish (temporary codename) is a third-person action RPG developed as open source.
 
-The mechanics of the game aren't set in stone yet, but they'll become clearer once the project has progressed further.
+The game is intended to be played as a co-op (no PvP) multiplayer with 1-4 players. The main focus is to develop a diverse and well-working combat system.
