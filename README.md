@@ -1,5 +1,4 @@
 # Surreal-Fish
-Surreal Fish is the project name for an open source action-packed third person RPG.
-Controls ought to be fairly similar to those in Smite and Tera, and weapon/ability system to be common to those who've played Guild Wars 2 before, but with no classes.
+Surreal Fish (temporary codename) is a third-person action RPG developed as open source.
 
-More detailed info as the game progresses in it's making.
+The mechanics of the game aren't set in stone yet, but they'll become clearer once the project has progressed further.
