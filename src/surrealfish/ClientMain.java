@@ -30,6 +30,7 @@ public class ClientMain extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         Globals.isClient = true;
+        Globals.app = this;
         Globals.assetManager = assetManager;
 
         BulletAppState physics = new BulletAppState();
