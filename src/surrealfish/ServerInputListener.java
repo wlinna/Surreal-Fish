@@ -7,6 +7,7 @@ import com.jme3.network.HostedConnection;
 import java.util.HashMap;
 import java.util.Map;
 import surrealfish.net.commands.sync.client.CmdButtons;
+import surrealfish.net.commands.sync.client.CmdTargetDirection;
 
 public class ServerInputListener extends AbstractAppState
         implements CommandHandler {
@@ -38,6 +39,22 @@ public class ServerInputListener extends AbstractAppState
 
     @Override
     public void readUnreliable(Object o, Command cmd) {
+        if (!(cmd instanceof CmdTargetDirection)) {
+            return;
+        }
+        
+        HostedConnection conn = (HostedConnection) o;
+        int playerId = conn.getAttribute("player-id");
+        
+        CmdTargetDirection cmdTargetDirection = (CmdTargetDirection) cmd;
+        
+        Input input = inputs.get(playerId);
+        
+        if (input == null) {
+            return;
+        }
+        
+        input.getTargetDirection().set(cmdTargetDirection.getTargetDirection());
     }
     
     public Input getInput(int playerId) {

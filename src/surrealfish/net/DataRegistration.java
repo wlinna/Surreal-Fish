@@ -14,6 +14,7 @@ import surrealfish.net.commands.sync.CmdAddEntity;
 import surrealfish.net.commands.sync.CmdRemoveEntity;
 import surrealfish.net.commands.sync.StateData;
 import surrealfish.net.commands.sync.client.CmdButtons;
+import surrealfish.net.commands.sync.client.CmdTargetDirection;
 
 public class DataRegistration {
 
@@ -32,6 +33,7 @@ public class DataRegistration {
         Serializer.registerClass(StateData.class);
         
         Serializer.registerClass(CmdButtons.class);
+        Serializer.registerClass(CmdTargetDirection.class);
 
         Serializer.registerClass(
                 TestCharacterCreator.TestCharacterStateData.class);

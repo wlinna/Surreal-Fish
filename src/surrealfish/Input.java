@@ -7,6 +7,7 @@ public class Input {
     private int flags;
     
     private Vector3f relativeDirection = new Vector3f();
+    private Vector3f targetDirection = new Vector3f();
     
     void setFlags(int newFlags) {
         flags = newFlags;
@@ -44,5 +45,9 @@ public class Input {
 
     public Vector3f getRelativeDirection() {
         return relativeDirection;
+    }
+
+    public Vector3f getTargetDirection() {
+        return targetDirection;
     }
 }

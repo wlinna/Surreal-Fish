@@ -1,15 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package surrealfish.entity.controls;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import surrealfish.Globals;
+import surrealfish.Input;
 import surrealfish.UserData;
 import surrealfish.entity.TestCharacterCreator;
 import surrealfish.net.commands.sync.StateData;
@@ -17,9 +15,12 @@ import surrealfish.util.Timer;
 
 public class CTestCharacter extends AbstractControl implements CSync {
 
-    private Vector3f relativeDirection = new Vector3f();
+    private static final Vector3f MINUS_Z = Vector3f.UNIT_Z.negate();
+    private Input input;
     private float walkSpeed = 3f;
     private Timer castTimer = new Timer(1f);
+    private final Vector3f tempRealDirection = new Vector3f();
+    private final Vector3f side = new Vector3f();
 
     @Override
     public void setSpatial(Spatial spatial) {
@@ -30,16 +31,27 @@ public class CTestCharacter extends AbstractControl implements CSync {
 
     @Override
     protected void controlUpdate(float tpf) {
-        spatial.move(relativeDirection.mult(walkSpeed * tpf));
+        if (Globals.isClient) {
+            return;
+        }
+        Vector3f forward = spatial.getLocalRotation().mult(MINUS_Z);
+        forward.cross(Vector3f.UNIT_Y, side);
+        float sideSign = -FastMath.sign(side.dot(input.getTargetDirection()));
 
+        spatial.rotate(0f, sideSign * forward.angleBetween(
+                input.getTargetDirection()), 0f);
 
-        if (!Globals.isClient) {
-            castTimer.update(tpf);
+        spatial.getLocalRotation()
+                .mult(input.getRelativeDirection(), tempRealDirection);
+        tempRealDirection.multLocal(walkSpeed * tpf);
 
-            if (castTimer.timeJustEnded()) {
-                castTimer.setTimeLeft(1f);
-                spatial.getControl(CSpell.class).castSpell("FireStuff");
-            }
+        spatial.move(tempRealDirection);
+
+        castTimer.update(tpf);
+
+        if (castTimer.timeJustEnded()) {
+            castTimer.setTimeLeft(1f);
+            spatial.getControl(CSpell.class).castSpell("FireStuff");
         }
     }
 
@@ -53,7 +65,7 @@ public class CTestCharacter extends AbstractControl implements CSync {
         return new TestCharacterCreator.TestCharacterStateData(id, spatial);
     }
 
-    public void setRelativeDirection(Vector3f direction) {
-        relativeDirection = direction;
+    public void setInput(Input input) {
+        this.input = input;
     }
 }

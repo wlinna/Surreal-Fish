@@ -160,12 +160,11 @@ public class ServerNetListener implements ConnectionListener, CommandHandler {
                         Spatial entity = area.newEntity(0, Vector3f.ZERO,
                                 Quaternion.ZERO, playerId);
                         entity.getControl(CTestCharacter.class)
-                                .setRelativeDirection(app.getStateManager()
+                                .setInput(app.getStateManager()
                                 .getState(ServerInputListener.class)
-                                .getInput(playerId).getRelativeDirection());
+                                .getInput(playerId));
 
-                        final int entityId = entity
-                                .getUserData(UserData.ENTITY_ID);
+                        int entityId = entity.getUserData(UserData.ENTITY_ID);
 
                         PlayerData.setData(playerId, PlayerData.ENTITY_ID,
                                 entityId);

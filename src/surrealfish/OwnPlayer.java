@@ -82,4 +82,8 @@ public class OwnPlayer extends AbstractAppState implements CommandHandler {
     public void setPlayerId(int playerId) {
         this.playerId = playerId;
     }
+
+    public Spatial getSpatial() {
+        return spatial;
+    }        
 }
