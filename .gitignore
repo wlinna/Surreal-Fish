@@ -18,3 +18,4 @@ hs_err_pid*
 *.blend2
 *.blend3
 /nbproject/private/
+/dist/
