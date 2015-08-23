@@ -4,6 +4,7 @@ import arkhados.net.ClientSender;
 import arkhados.net.DefaultReceiver;
 import arkhados.net.OneTrueMessage;
 import arkhados.net.Receiver;
+import com.jme3.app.LostFocusBehavior;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.network.Network;
@@ -22,13 +23,15 @@ public class ClientMain extends SimpleApplication {
 
     public static void main(String[] args) {
         ClientMain app = new ClientMain();
-        app.pauseOnFocus = false;
+        app.lostFocusBehavior = LostFocusBehavior.Disabled;
         app.start();
     }
     private NetworkClient client;
 
     @Override
     public void simpleInitApp() {
+        DataRegistration.register();
+
         Globals.isClient = true;
         Globals.app = this;
         Globals.assetManager = assetManager;
@@ -37,11 +40,9 @@ public class ClientMain extends SimpleApplication {
         physics.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
         stateManager.attach(physics);
         physics.getPhysicsSpace().setAccuracy(1 / 30f);
-        
+
         // Bullet debug
         physics.setDebugEnabled(true);
-
-        DataRegistration.register();
 
         client = Network.createClient();
         Receiver receiver = new DefaultReceiver();

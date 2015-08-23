@@ -4,6 +4,7 @@ import arkhados.net.DefaultReceiver;
 import arkhados.net.OneTrueMessage;
 import arkhados.net.Receiver;
 import arkhados.net.ServerSender;
+import com.jme3.app.LostFocusBehavior;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.network.Network;
@@ -19,7 +20,7 @@ public class ServerMain extends SimpleApplication {
 
     public static void main(String[] args) {   
         ServerMain app = new ServerMain();
-        app.pauseOnFocus = false;
+        app.lostFocusBehavior = LostFocusBehavior.Disabled;
         app.start(JmeContext.Type.Headless);
     }
     private Server server;
@@ -27,7 +28,9 @@ public class ServerMain extends SimpleApplication {
     private ServerSender sender;
 
     @Override
-    public void simpleInitApp() {
+    public void simpleInitApp() {        
+        DataRegistration.register();
+        
         Globals.isClient = false;
         Globals.app = this;
         Globals.assetManager = assetManager;
@@ -48,7 +51,6 @@ public class ServerMain extends SimpleApplication {
         sender = new ServerSender(server);
         receiver.registerCommandHandler(sender);
 
-        DataRegistration.register();
 
         ServerNetListener netListener = new ServerNetListener(this, server);
         receiver.registerCommandHandler(netListener);
